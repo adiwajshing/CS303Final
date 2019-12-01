@@ -156,28 +156,31 @@ def make_age_model ():
 	model.add(Conv2D(64, kernel_size=3, activation="relu", padding="same"))
 	model.add(MaxPooling2D())
 
-	model.add(Conv2D(64, kernel_size=3, activation="relu", padding="same"))
-	model.add(MaxPooling2D())
+	#model.add(Conv2D(64, kernel_size=3, activation="relu", padding="same"))
+	#model.add(MaxPooling2D())
 
-	model.add(Conv2D(64, kernel_size=3, activation="relu", padding="same"))
+	#model.add(Conv2D(64, kernel_size=3, activation="relu", padding="same"))
+	#model.add(MaxPooling2D())
+
+	model.add(Conv2D(32, kernel_size=3, activation="relu", padding="same"))
 	model.add(MaxPooling2D())
 
 	model.add(Conv2D(32, kernel_size=3, activation="relu", padding="same"))
 	model.add(MaxPooling2D())
-	model.add(Dropout(0.2))
+	#model.add(Dropout(0.2))
 
 	model.add(Flatten())
 
 	model.add(Dense(500, activation='relu'))
-	model.add(Dropout(0.1))
+	model.add(Dropout(0.5))
 
 	model.add(Dense(500, activation='relu'))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.5))
 
 	model.add(Dense(400, activation='relu'))
-	#model.add(Dropout(0.1))
+	model.add(Dropout(0.5))
 
-	model.add(Dense(5, activation='sigmoid'))
+	model.add(Dense(5, activation='softmax'))
 
 	model.compile(loss='categorical_crossentropy',
               optimizer='rmsprop',
@@ -211,19 +214,21 @@ def train_age_model ():
 
 	classes = validation_generator.classes
 	class_weights = class_weight.compute_class_weight('balanced', np.unique(classes), classes)
+	class_weights[4] *= 0.65
 	print (class_weights)
 
-	#callbacks=[EarlyStopping(patience=3, restore_best_weights=True), 
-    #       ReduceLROnPlateau(patience=2), 
-     #      ModelCheckpoint(filepath='age_model_chk.h5', save_best_only=True)] 
+	callbacks=[EarlyStopping(patience=3, restore_best_weights=True), 
+           ReduceLROnPlateau(patience=2), 
+           ModelCheckpoint(filepath='age_model_chk.h5', save_best_only=True)] 
+
 
 	model.fit_generator(
         train_generator,
         steps_per_epoch=2048 // batch_size,
-        epochs=10,
+        epochs=5,
         validation_data=validation_generator,
         validation_steps=512 // batch_size,
-        #callbacks=callbacks,
+        callbacks=callbacks,
         class_weight=class_weights
         )
 
